@@ -28,14 +28,18 @@ public class ProtocoloCliente {
 				}
 				else {
 					System.out.println("Debe enviar una cadena del estilo ALGORITMOS:ALG1:ALG2:ALG3");
-					
+					continue;
 				}
 			}
-
+			else {
+				System.out.println("Error detectado en su mensaje, intente escribir de nuevo siguiendo el protocolo.");
+				continue;
+			}
 			resServidor = pIn.readLine();
 
 			if(resServidor.equals("ERROR")) {
-				System.out.println("Error en protocolo, intente escribir de nuevo su respuesta.");
+				System.out.println("Error detectado en servidor, intente escribir de nuevo su respuesta.");
+				continue;
 				
 			}
 			else if(resServidor.equals("OK")) {
