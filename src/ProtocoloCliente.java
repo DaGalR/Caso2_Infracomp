@@ -64,28 +64,36 @@ public class ProtocoloCliente {
 						String cerString = DatatypeConverter.printBase64Binary(cerBytes);
 						System.out.println("Certificado cliente " + cerString);
 						pOut.println(cerString);
-						contadorProtocolo++;
 						resServidor=pIn.readLine();
 						
 						if(resServidor.equals("OK")) {
 							
+							contadorProtocolo++;
 							resServidor=pIn.readLine();
 							stringSerServidor = resServidor;
+							
 							System.out.println("Certificado servidor " + stringSerServidor);
+							
 							byte[] cerServByte = DatatypeConverter.parseBase64Binary(stringSerServidor);
 							CertificateFactory cf = CertificateFactory.getInstance("X.509");
 							X509Certificate c = (X509Certificate) cf.generateCertificate(new ByteArrayInputStream(cerServByte));
+							
 							boolean valido = verificarCertificado(c);
+							
 							if(valido) {
 								pOut.println("OK");
 								contadorProtocolo++;
 							}
 							else {
 								pOut.println("ERROR");
-
+								
 							}
 							kPubServ = c.getPublicKey();
 							
+						}
+						else {
+							System.out.println("Error del servidor: Su certificado no es válido");
+							continue;
 						}
 						continue;
 					} catch (OperatorCreationException | CertificateException e) {
