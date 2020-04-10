@@ -9,7 +9,7 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Calendar;
 import javax.crypto.KeyGenerator;
-
+import javax.xml.bind.DatatypeConverter;
 import org.bouncycastle.*;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
@@ -43,7 +43,8 @@ public class ProtocoloCliente {
 					try {
 						X509Certificate certificado = gc(keyPair,"SHA512");
 						byte[] cerBytes = certificado.getEncoded();
-						//String cerString = DatatypeConverter.printBase64Binary(cerBytes);
+						String cerString = DatatypeConverter.printBase64Binary(cerBytes);
+						pOut.println(cerString);
 					} catch (OperatorCreationException | CertificateException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
