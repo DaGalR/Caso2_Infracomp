@@ -17,6 +17,7 @@ import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.Calendar;
 import javax.crypto.KeyGenerator;
+import javax.crypto.spec.SecretKeySpec;
 import javax.xml.bind.DatatypeConverter;
 import org.bouncycastle.*;
 import org.bouncycastle.asn1.x500.X500Name;
@@ -33,14 +34,17 @@ public class ProtocoloCliente {
 	public static void procesar(BufferedReader stdIn, BufferedReader pIn,PrintWriter pOut) throws IOException{
 		
 		String[] algs;
-		String resServidor, resCliente, stringSerServidor;
+		String resServidor, resCliente, stringSerServidor,cifradoA,cifradoB, algHMACelegido,algAsimElegido, algSimElegido;
 		resServidor ="";
 		stringSerServidor="";
-		int contadorProtocolo = 0;
-		String algElegido="";
+		cifradoA="";
+		cifradoB="";
+		algAsimElegido="";
+		algSimElegido="";
+		algHMACelegido="";
 		KeyPairGenerator generator;
 		KeyPair keyPair;
-		
+		int contadorProtocolo = 0;
 		try {
 			generator = KeyPairGenerator.getInstance("RSA");
 			keyPair = generator.generateKeyPair();
@@ -55,40 +59,67 @@ public class ProtocoloCliente {
 				}
 				
 				System.out.println("Contador va en " + contadorProtocolo);	
-				if(contadorProtocolo == 2 && algElegido != null && algElegido != "") {
+				if(contadorProtocolo == 2 && algHMACelegido != null && algHMACelegido != "") {
 					
 					try {
 						
-						X509Certificate certificado = gc(keyPair,algElegido);
+						X509Certificate certificado = gc(keyPair,algHMACelegido);
 						byte[] cerBytes = certificado.getEncoded();
 						String cerString = DatatypeConverter.printBase64Binary(cerBytes);
-						System.out.println("Certificado cliente " + cerString);
+						System.out.println("Generando su certificado de cliente... " + cerString);
 						pOut.println(cerString);
 						resServidor=pIn.readLine();
 						
 						if(resServidor.equals("OK")) {
 							
 							contadorProtocolo++;
+							System.out.println("Recibiendo certificado del servidor...");
 							resServidor=pIn.readLine();
 							stringSerServidor = resServidor;
 							
-							System.out.println("Certificado servidor " + stringSerServidor);
+							System.out.println("Certificado servidor recibido para procesar... " + stringSerServidor);
 							
 							byte[] cerServByte = DatatypeConverter.parseBase64Binary(stringSerServidor);
 							CertificateFactory cf = CertificateFactory.getInstance("X.509");
 							X509Certificate c = (X509Certificate) cf.generateCertificate(new ByteArrayInputStream(cerServByte));
+							kPubServ = c.getPublicKey();
 							
 							boolean valido = verificarCertificado(c);
 							
 							if(valido) {
-								pOut.println("OK");
+								
+								System.out.println("El certificado recibido del servidor es válido, escriba 'OK' para continuar"); 
+								resCliente=stdIn.readLine();
+								pOut.println(resCliente);
+								
+								System.out.println("Recibiendo respuestas del servidor...");
+								cifradoA = pIn.readLine();
+								cifradoB = pIn.readLine();
+								
+								System.out.println("Recibidos dos cifrados, procesando...");
+								byte[] k_sc = Cifrado.descifrar(keyPair.getPrivate(), "RSA", DatatypeConverter.parseBase64Binary(cifradoA), true);
+								System.out.println("K_SC es: "+k_sc);
+								Key k_scPro = new SecretKeySpec(k_sc, 0, k_sc.length, algSimElegido );
+								byte[] retoByte = Cifrado.descifrar(k_scPro, algSimElegido, DatatypeConverter.parseBase64Binary(cifradoB),false);
+								String retoString = DatatypeConverter.printBase64Binary(retoByte);
+								System.out.println("Reto descifrado "+ retoString);
+								
+								System.out.println("Cifrando y enviando el reto con llave del servidor...");
+								byte[] retoCifrado = Cifrado.cifrar(k_scPro, algSimElegido, retoString, true);
+								String retoCifradoString = DatatypeConverter.printBase64Binary(retoCifrado);
+								System.out.println("Enviando reto cifrado de vuelta: "+ retoCifradoString);
+								pOut.println(retoCifradoString);
+								
+								resServidor = pIn.readLine();
+								System.out.println("Respuesta recibida de reto "+ resServidor);
 								contadorProtocolo++;
+								continue;
 							}
 							else {
 								pOut.println("ERROR");
 								
 							}
-							kPubServ = c.getPublicKey();
+							
 							
 						}
 						else {
@@ -112,8 +143,13 @@ public class ProtocoloCliente {
 				else if(resCliente.contains("ALGORITMOS:")) {
 					algs = resCliente.split(":");
 					if(algs.length == 4) {
-						algElegido = algs[3].substring(4, algs[3].length());
-						System.out.println("ALGORITMO ELEGIDO " + algElegido);
+						algSimElegido=algs[1];
+						algAsimElegido=algs[2];
+						algHMACelegido = algs[3].substring(4, algs[3].length());
+						System.out.println("ALGORITMO SIMETRICO ELEGIDO " + algSimElegido);
+						System.out.println("ALGORITMO ASIMETRICO ELEGIDO " + algAsimElegido);
+						System.out.println("ALGORITMO HMAC ELEGIDO " + algHMACelegido);
+
 						resCliente.trim();
 						pOut.println(resCliente);
 					}
@@ -128,7 +164,7 @@ public class ProtocoloCliente {
 				}
 				resServidor = pIn.readLine();
 				if(resServidor.equals("ERROR")) {
-					System.out.println("Error detectado en servidor, intente escribir de nuevo su respuesta.");
+					System.out.println("Error detectado desde el servidor, intente escribir de nuevo su respuesta.");
 					continue;
 					
 				}

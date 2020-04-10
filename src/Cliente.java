@@ -77,7 +77,6 @@ public class Cliente {
 		}
 		
 		
-		System.out.println("antes de procesarr");
 		ProtocoloCliente.procesar(stdIn,lector,escritor);
 		
 		stdIn.close();
