@@ -22,7 +22,7 @@ public class Cliente {
 		
 //		FileOutputStream archivoUsuarios = new FileOutputStream("docs/usuarios.txt");
 //		ObjectOutputStream escritorUsuarios = new ObjectOutputStream(archivoUsuarios);
-//		System.out.println("¿Desea ingresar o registrarse?");
+//		System.out.println("ï¿½Desea ingresar o registrarse?");
 //		
 //		
 //		String tipoIngreso = stdIn.readLine();
@@ -32,10 +32,10 @@ public class Cliente {
 //		
 //		if(tipoIngreso.equals("registrarse"))
 //		{
-//			System.out.println("¿Cuál es su nombre?");
+//			System.out.println("ï¿½Cuï¿½l es su nombre?");
 //			nombre = stdIn.readLine();
 //			
-//			System.out.println("¿Qué usuario le gustaría tener?");
+//			System.out.println("ï¿½Quï¿½ usuario le gustarï¿½a tener?");
 //			usuario = stdIn.readLine();
 //			
 //			//TO DO
@@ -45,15 +45,15 @@ public class Cliente {
 //				usuario = stdIn.readLine();
 //			}
 //			
-//			System.out.println("¿Escriba una contraseña?");
+//			System.out.println("ï¿½Escriba una contraseï¿½a?");
 //			contrasenia= stdIn.readLine();
 //			
-//			System.out.println("Repita su contraseña");
+//			System.out.println("Repita su contraseï¿½a");
 //			while(!contrasenia.contentEquals(stdIn.readLine()))
 //			{
-//				System.out.println("Las contraseñas no coinciden, escriba una nueva contraseña");
+//				System.out.println("Las contraseï¿½as no coinciden, escriba una nueva contraseï¿½a");
 //				contrasenia= stdIn.readLine();
-//				System.out.println("Repita su contraseña");
+//				System.out.println("Repita su contraseï¿½a");
 //			}
 //			
 //			escritorUsuarios.writeChars(nombre);
@@ -77,7 +77,6 @@ public class Cliente {
 		}
 		
 		
-		System.out.println("antes de procesarr");
 		ProtocoloCliente.procesar(stdIn,lector,escritor);
 		
 		stdIn.close();
