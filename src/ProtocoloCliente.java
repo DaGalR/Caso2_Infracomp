@@ -97,17 +97,16 @@ public class ProtocoloCliente {
 								System.out.println("Recibiendo respuestas del servidor...");
 								cifradoA = pIn.readLine();
 								cifradoB = pIn.readLine();
-								
 								System.out.println("Recibidos dos cifrados, procesando...");
 								byte[] k_sc = Cifrado.descifrar(keyPair.getPrivate(), "RSA", DatatypeConverter.parseBase64Binary(cifradoA), true);
-								System.out.println("K_SC es: "+k_sc);
 								Key k_scPro = new SecretKeySpec(k_sc, 0, k_sc.length, algSimElegido );
 								byte[] retoByte = Cifrado.descifrar(k_scPro, algSimElegido, DatatypeConverter.parseBase64Binary(cifradoB),false);
 								String retoString = DatatypeConverter.printBase64Binary(retoByte);
 								System.out.println("Reto descifrado "+ retoString);
 								
 								System.out.println("Cifrando y enviando el reto con llave del servidor...");
-								byte[] retoCifrado = Cifrado.cifrar(kPubServ, "RSA", retoString, true);
+								System.out.println("llave publica de servidor: " + kPubServ);
+								byte[] retoCifrado = Cifrado.cifrar(kPubServ, algAsimElegido, retoString, true);
 								String retoCifradoString = DatatypeConverter.printBase64Binary(retoCifrado);
 
 								System.out.println("Enviando reto cifrado de vuelta: "+ retoCifradoString);
@@ -177,7 +176,7 @@ public class ProtocoloCliente {
 				}
 				
 			}
-		} catch (NoSuchAlgorithmException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 
