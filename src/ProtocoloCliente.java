@@ -16,6 +16,8 @@ import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.Calendar;
+
+import javax.crypto.BadPaddingException;
 import javax.crypto.KeyGenerator;
 import javax.crypto.spec.SecretKeySpec;
 import javax.xml.bind.DatatypeConverter;
@@ -105,8 +107,9 @@ public class ProtocoloCliente {
 								System.out.println("Reto descifrado "+ retoString);
 								
 								System.out.println("Cifrando y enviando el reto con llave del servidor...");
-								byte[] retoCifrado = Cifrado.cifrar(k_scPro, algSimElegido, retoString, true);
+								byte[] retoCifrado = Cifrado.cifrar(kPubServ, "RSA", retoString, true);
 								String retoCifradoString = DatatypeConverter.printBase64Binary(retoCifrado);
+
 								System.out.println("Enviando reto cifrado de vuelta: "+ retoCifradoString);
 								pOut.println(retoCifradoString);
 								
@@ -127,7 +130,7 @@ public class ProtocoloCliente {
 							continue;
 						}
 						continue;
-					} catch (OperatorCreationException | CertificateException e) {
+					} catch (Exception e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
