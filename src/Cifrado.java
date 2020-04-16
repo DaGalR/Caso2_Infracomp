@@ -3,6 +3,7 @@
 import java.security.Key;
 
 import javax.crypto.*;
+import javax.xml.bind.DatatypeConverter;
 
 public class Cifrado 
 {
@@ -24,7 +25,7 @@ public class Cifrado
 			if(tipo) {
 				
 				Cipher cifrador = Cipher.getInstance(algoritmo);
-				byte[] textoBytes= texto.getBytes();
+				byte[] textoBytes= DatatypeConverter.parseBase64Binary(texto);
 
 				cifrador.init(Cipher.ENCRYPT_MODE, llave);
 				textoCifrado = cifrador.doFinal(textoBytes);
