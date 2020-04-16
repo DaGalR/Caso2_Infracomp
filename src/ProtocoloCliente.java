@@ -15,7 +15,10 @@ import java.security.SignatureException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.KeyGenerator;
@@ -44,6 +47,7 @@ public class ProtocoloCliente {
 		algAsimElegido="";
 		algSimElegido="";
 		algHMACelegido="";
+		Key k_scPro=null;
 		KeyPairGenerator generator;
 		KeyPair keyPair;
 		int contadorProtocolo = 0;
@@ -99,7 +103,7 @@ public class ProtocoloCliente {
 								cifradoB = pIn.readLine();
 								System.out.println("Recibidos dos cifrados, procesando...");
 								byte[] k_sc = Cifrado.descifrar(keyPair.getPrivate(), "RSA", DatatypeConverter.parseBase64Binary(cifradoA), true);
-								Key k_scPro = new SecretKeySpec(k_sc, 0, k_sc.length, algSimElegido );
+								k_scPro = new SecretKeySpec(k_sc, 0, k_sc.length, algSimElegido );
 								byte[] retoByte = Cifrado.descifrar(k_scPro, algSimElegido, DatatypeConverter.parseBase64Binary(cifradoB),false);
 								String retoString = DatatypeConverter.printBase64Binary(retoByte);
 								System.out.println("Reto descifrado "+ retoString);
@@ -133,6 +137,31 @@ public class ProtocoloCliente {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
+				}
+				
+				
+				if(contadorProtocolo==4 && k_scPro!=null)
+				{
+					System.out.println("Escriba su identificador (número de 4 dígitos)");
+					resCliente=stdIn.readLine();
+					byte[] idCifrado = Cifrado.cifrar(k_scPro, algSimElegido, resCliente, false);
+					String idCifradoStr=DatatypeConverter.printBase64Binary(idCifrado);
+					System.out.println("Enviando al servidor el id cifrado: " + idCifradoStr);
+					pOut.println(idCifradoStr );
+					
+					//Se recibe la hora
+					resServidor=pIn.readLine();
+					System.out.println("Se recibe la hora cifrada: " + resServidor);
+					byte[] horaBytes = Cifrado.descifrar(k_scPro, algSimElegido, DatatypeConverter.parseBase64Binary(resServidor), false);
+					String horaStr= DatatypeConverter.printBase64Binary(horaBytes);
+					
+					DateFormat formHora = new SimpleDateFormat("HHmm");
+					Date hora = formHora.parse(horaStr);
+					System.out.println("La hora recibida es: " + hora.getHours() + ":" + hora.getMinutes());
+					
+					System.out.println("Si todo está bien, escriab OK para terminar");
+					pOut.println(stdIn.readLine());
+					break;
 				}
 				
 				System.out.println("Escriba el mensaje a enviar al servidor: ");
@@ -174,6 +203,8 @@ public class ProtocoloCliente {
 					System.out.println("Respuesta aceptada");
 					contadorProtocolo++;
 				}
+				
+				
 				
 			}
 		} catch (Exception e) {
