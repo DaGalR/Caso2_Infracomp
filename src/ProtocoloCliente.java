@@ -227,7 +227,6 @@ public class ProtocoloCliente {
 					//Se recibe la hora
 					resServidor=pIn.readLine();
 					System.out.println("REPORTE: Se recibe la hora cifrada: " + resServidor);
-					Thread.sleep(500);
 
 					byte[] horaBytes = Cifrado.descifrar(k_scPro, algSimElegido, DatatypeConverter.parseBase64Binary(resServidor), false);
 					
@@ -236,6 +235,7 @@ public class ProtocoloCliente {
 
 					DateFormat formHora = new SimpleDateFormat("HHmm");
 					Date hora = formHora.parse(horaStr);
+					Thread.sleep(500);
 					System.out.println("REPORTE: La hora recibida es: " + hora.getHours() + ":" + hora.getMinutes());
 
 					System.out.println("INSTRUCCIÓN: Si todo está bien, escriab OK para terminar. De lo contrario escriba ERROR");
@@ -243,7 +243,7 @@ public class ProtocoloCliente {
 					pOut.println(resCliente);
 					if(resCliente.equals("OK"))
 					{
-						System.out.println("SALIENDO...");
+						System.out.println("SALIENDO");
 						break;
 					}
 				}
