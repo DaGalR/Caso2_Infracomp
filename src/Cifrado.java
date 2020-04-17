@@ -54,7 +54,7 @@ public class Cifrado
 	 * @param algoritmo para descifrar
 	 * @param texto entrada a descifrar
 	 * @param tipo true si es para descifrar asimetrico, false de lo contrario
-	 * @return
+	 * @return retorna el mesaje decifrado
 	 */
 	public static byte[] descifrar(Key llave, String algoritmo, byte[] texto, boolean tipo )
 	{
