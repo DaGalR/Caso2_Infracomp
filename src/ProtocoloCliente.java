@@ -19,7 +19,6 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
-
 import javax.crypto.BadPaddingException;
 import javax.crypto.KeyGenerator;
 import javax.crypto.spec.SecretKeySpec;
@@ -96,7 +95,7 @@ public class ProtocoloCliente {
 						if(algs.length == 4) {
 							algSimElegido=algs[1];
 							algAsimElegido=algs[2];
-							algHMACelegido = algs[3].substring(4, algs[3].length());
+							algHMACelegido = algs[3];
 							Thread.sleep(500);
 							System.out.println("REPORTE: algoritmo simétrico elegido " + algSimElegido);
 							Thread.sleep(500);
@@ -124,7 +123,7 @@ public class ProtocoloCliente {
 				{	
 					try {
 
-						X509Certificate certificado = gc(keyPair,algHMACelegido);
+						X509Certificate certificado = gc(keyPair);
 						byte[] cerBytes = certificado.getEncoded();
 						String cerString = DatatypeConverter.printBase64Binary(cerBytes);
 						System.out.println("REPORTE: Generando su certificado de cliente... " + cerString);
@@ -238,7 +237,7 @@ public class ProtocoloCliente {
 					Thread.sleep(500);
 					System.out.println("REPORTE: La hora recibida es: " + hora.getHours() + ":" + hora.getMinutes());
 
-					System.out.println("INSTRUCCIÓN: Si todo está bien, escriab OK para terminar. De lo contrario escriba ERROR");
+					System.out.println("INSTRUCCIÓN: Si todo está bien, escriba OK para terminar. De lo contrario escriba ERROR");
 					resCliente=stdIn.readLine();
 					pOut.println(resCliente);
 					if(resCliente.equals("OK"))
@@ -275,17 +274,16 @@ public class ProtocoloCliente {
 	/**
 	 * Método para generar certificado
 	 * @param keyPair par de llaves publicas y privadas
-	 * @param alg algorimto para cifrar
 	 * @return retorna el certificado
 	 * @throws OperatorCreationException
 	 * @throws CertificateException
 	 */
-	public static X509Certificate gc(KeyPair keyPair, String alg) throws OperatorCreationException, CertificateException{
+	public static X509Certificate gc(KeyPair keyPair) throws OperatorCreationException, CertificateException{
 
 		Calendar endCalendar = Calendar.getInstance();
 		endCalendar.add(Calendar.YEAR, 10);
 		X509v3CertificateBuilder x509v3CertificateBuilder = new X509v3CertificateBuilder(new X500Name("CN=localhost"), BigInteger.valueOf(1), 		Calendar.getInstance().getTime(), endCalendar.getTime(), new X500Name("CN=localhost"), 		SubjectPublicKeyInfo.getInstance(keyPair.getPublic().getEncoded()));
-		ContentSigner contentSigner = new JcaContentSignerBuilder(alg+"withRSA").build(keyPair.getPrivate());
+		ContentSigner contentSigner = new JcaContentSignerBuilder("SHA1withRSA").build(keyPair.getPrivate());
 		X509CertificateHolder x509CertificateHolder = x509v3CertificateBuilder.build(contentSigner);
 		return new JcaX509CertificateConverter().setProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider()).getCertificate(x509CertificateHolder);
 	}
